@@ -1,0 +1,11 @@
+syntax="proto3";
+package api;
+import "node/node.proto";
+
+message HeartBeatReq{
+  node.Node Node = 1;
+}
+message HeartBeatResp{
+  int32 RetCode = 1;
+  string RetMessage = 2;
+}
