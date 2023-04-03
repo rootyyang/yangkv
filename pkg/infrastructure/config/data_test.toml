@@ -1,0 +1,7 @@
+[node]
+is_master=false
+discovery_list=["127.0.0.1:1888", "127.0.0.1:2888", "127.0.0.1:3888"]
+transport=4888
+cluster_name="kvcluster"
+
+

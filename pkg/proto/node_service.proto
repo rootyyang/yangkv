@@ -1,0 +1,48 @@
+syntax = "proto3";
+package proto;
+
+import "pkg/proto/node_meta.proto";
+option go_package="pkg/proto;proto";
+
+message AppendEntiresReq{
+    int32 term=1;
+    string leader_id=2;
+}
+message AppendEtriesResp{
+    int32 term=1;
+    bool success=2;
+}
+message RequestVoteReq{
+    int32 term=1;
+    string candidate_id=2;
+}
+message RequestVoteResp{
+    int32 term=1;
+    bool vote_granted=2;
+}
+
+
+message HeartBeatReq{
+    NodeMeta nodeMeta = 1;
+}
+message HeartBeatResp{
+    int32 ret_code = 1;
+    string ret_message = 2;
+}
+
+
+message LeaveClusterReq{
+    NodeMeta nodeMeta = 1;
+}
+message LeaveClusterResp{
+    int32 ret_code = 1;
+    string ret_message = 2;
+}
+
+
+service NodeService {
+    rpc HeartBeat (HeartBeatReq) returns (HeartBeatResp);
+    rpc LeaveCluster (LeaveClusterReq) returns (LeaveClusterResp);
+    rpc AppendEntires (AppendEntiresReq) returns(AppendEtriesResp);
+    rpc RequestVote (AppendEntiresReq) returns(AppendEtriesResp);
+} 
