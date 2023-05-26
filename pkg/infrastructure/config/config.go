@@ -3,7 +3,6 @@ package config
 import (
 	"fmt"
 
-	gomock "github.com/golang/mock/gomock"
 	"github.com/spf13/pflag"
 )
 
@@ -55,11 +54,4 @@ func GetConfig() (ConfigInterface, error) {
 //该函数不可并发访问
 func registerConfig(pConfigName string, pConfigInterface ConfigInterface) {
 	gUseConfig.configName2Config[pConfigName] = pConfigInterface
-}
-
-func RegisterAndUseMockConfig(mockCtl *gomock.Controller) *MockConfigInterface {
-	configInterface := NewMockConfigInterface(mockCtl)
-	registerConfig("mockConfig", configInterface)
-	SetConfig("mockConfig")
-	return configInterface
 }

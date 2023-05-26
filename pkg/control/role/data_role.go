@@ -21,7 +21,7 @@ func GetDataRole() DataRole {
 }
 
 type DataRoleImp struct {
-	masterNode node.NodeInterface
+	masterNode node.Node
 }
 
 func (dr *DataRoleImp) Start(pClusterName string, pDiscoveryList []string, plocalNodeTransport string) error {

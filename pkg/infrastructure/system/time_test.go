@@ -15,7 +15,8 @@ func TestUseMock(t *testing.T) {
 	if getClock != getClock {
 		t.Fatalf("GetClock()=[%v], want=[%v] ", getClock, mockClock)
 	}
-	mockTicker := time.Ticker{C: make(<-chan time.Time)}
+
+	mockTicker := SysClockTicker{&time.Ticker{C: make(<-chan time.Time)}}
 
 	mockClock.EXPECT().Ticker(gomock.Any()).Return(&mockTicker).Times(1)
 	getTicker := getClock.Ticker(3 * time.Second)

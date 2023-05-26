@@ -2,10 +2,6 @@ package log
 
 import (
 	"fmt"
-	"runtime"
-	"strconv"
-
-	"github.com/golang/mock/gomock"
 )
 
 const (
@@ -13,6 +9,10 @@ const (
 	WarnLevel
 	ErrorLevel
 )
+
+func init() {
+
+}
 
 type LogInterface interface {
 	Start(pFileName string, pMaxSizeMB int, pMaxBackupFileNum int, pMaxAgeDay int, pCompress bool) error
@@ -56,22 +56,4 @@ func GetLogInstance() LogInterface {
 //该函数不可并发访问
 func registerLog(pLogName string, pLogInterface LogInterface) {
 	globalLog.name2Log[pLogName] = pLogInterface
-}
-
-func RegisterAndUseMockLog(mockCtl *gomock.Controller) {
-	logInterface := NewMockLogInterface(mockCtl)
-	logInterface.EXPECT().Debugf(gomock.Any(), gomock.Any()).Do(func(template string, args ...interface{}) {
-		_, file, line, _ := runtime.Caller(6)
-		fmt.Printf(file+":"+strconv.Itoa(line)+":"+template+"\n", args...)
-	}).AnyTimes()
-	logInterface.EXPECT().Warnf(gomock.Any(), gomock.Any()).Do(func(template string, args ...interface{}) {
-		_, file, line, _ := runtime.Caller(6)
-		fmt.Printf(file+":"+strconv.Itoa(line)+":"+template+"\n", args...)
-	}).AnyTimes()
-	logInterface.EXPECT().Errorf(gomock.Any(), gomock.Any()).Do(func(template string, args ...interface{}) {
-		_, file, line, _ := runtime.Caller(6)
-		fmt.Printf(file+":"+strconv.Itoa(line)+":"+template+"\n", args...)
-	}).AnyTimes()
-	registerLog("mockLog", logInterface)
-	SetUseLog("mockLog")
 }

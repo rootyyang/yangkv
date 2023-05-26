@@ -54,7 +54,7 @@ func TestMasterRole(t *testing.T) {
 		t.Fatalf("node.GetNodeProvider()=%v,%v , want not nil,  nil", nodeProvier, err)
 	}
 	type nodeWrapper struct {
-		node     node.NodeInterface
+		node     node.Node
 		nodeMeta *proto.NodeMeta
 	}
 

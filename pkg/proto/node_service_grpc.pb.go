@@ -22,8 +22,8 @@ const _ = grpc.SupportPackageIsVersion7
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type NodeServiceClient interface {
-	HeartBeat(ctx context.Context, in *HeartBeatReq, opts ...grpc.CallOption) (*HeartBeatResp, error)
-	LeaveCluster(ctx context.Context, in *LeaveClusterReq, opts ...grpc.CallOption) (*LeaveClusterResp, error)
+	AppendEntires(ctx context.Context, in *AppendEntiresReq, opts ...grpc.CallOption) (*AppendEtriesResp, error)
+	RequestVote(ctx context.Context, in *RequestVoteReq, opts ...grpc.CallOption) (*RequestVoteResp, error)
 }
 
 type nodeServiceClient struct {
@@ -34,18 +34,18 @@ func NewNodeServiceClient(cc grpc.ClientConnInterface) NodeServiceClient {
 	return &nodeServiceClient{cc}
 }
 
-func (c *nodeServiceClient) HeartBeat(ctx context.Context, in *HeartBeatReq, opts ...grpc.CallOption) (*HeartBeatResp, error) {
-	out := new(HeartBeatResp)
-	err := c.cc.Invoke(ctx, "/proto.NodeService/HeartBeat", in, out, opts...)
+func (c *nodeServiceClient) AppendEntires(ctx context.Context, in *AppendEntiresReq, opts ...grpc.CallOption) (*AppendEtriesResp, error) {
+	out := new(AppendEtriesResp)
+	err := c.cc.Invoke(ctx, "/proto.NodeService/AppendEntires", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *nodeServiceClient) LeaveCluster(ctx context.Context, in *LeaveClusterReq, opts ...grpc.CallOption) (*LeaveClusterResp, error) {
-	out := new(LeaveClusterResp)
-	err := c.cc.Invoke(ctx, "/proto.NodeService/LeaveCluster", in, out, opts...)
+func (c *nodeServiceClient) RequestVote(ctx context.Context, in *RequestVoteReq, opts ...grpc.CallOption) (*RequestVoteResp, error) {
+	out := new(RequestVoteResp)
+	err := c.cc.Invoke(ctx, "/proto.NodeService/RequestVote", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -56,8 +56,8 @@ func (c *nodeServiceClient) LeaveCluster(ctx context.Context, in *LeaveClusterRe
 // All implementations must embed UnimplementedNodeServiceServer
 // for forward compatibility
 type NodeServiceServer interface {
-	HeartBeat(context.Context, *HeartBeatReq) (*HeartBeatResp, error)
-	LeaveCluster(context.Context, *LeaveClusterReq) (*LeaveClusterResp, error)
+	AppendEntires(context.Context, *AppendEntiresReq) (*AppendEtriesResp, error)
+	RequestVote(context.Context, *RequestVoteReq) (*RequestVoteResp, error)
 	mustEmbedUnimplementedNodeServiceServer()
 }
 
@@ -65,11 +65,11 @@ type NodeServiceServer interface {
 type UnimplementedNodeServiceServer struct {
 }
 
-func (UnimplementedNodeServiceServer) HeartBeat(context.Context, *HeartBeatReq) (*HeartBeatResp, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method HeartBeat not implemented")
+func (UnimplementedNodeServiceServer) AppendEntires(context.Context, *AppendEntiresReq) (*AppendEtriesResp, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method AppendEntires not implemented")
 }
-func (UnimplementedNodeServiceServer) LeaveCluster(context.Context, *LeaveClusterReq) (*LeaveClusterResp, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method LeaveCluster not implemented")
+func (UnimplementedNodeServiceServer) RequestVote(context.Context, *RequestVoteReq) (*RequestVoteResp, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method RequestVote not implemented")
 }
 func (UnimplementedNodeServiceServer) mustEmbedUnimplementedNodeServiceServer() {}
 
@@ -84,38 +84,38 @@ func RegisterNodeServiceServer(s grpc.ServiceRegistrar, srv NodeServiceServer) {
 	s.RegisterService(&NodeService_ServiceDesc, srv)
 }
 
-func _NodeService_HeartBeat_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(HeartBeatReq)
+func _NodeService_AppendEntires_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(AppendEntiresReq)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(NodeServiceServer).HeartBeat(ctx, in)
+		return srv.(NodeServiceServer).AppendEntires(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/proto.NodeService/HeartBeat",
+		FullMethod: "/proto.NodeService/AppendEntires",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(NodeServiceServer).HeartBeat(ctx, req.(*HeartBeatReq))
+		return srv.(NodeServiceServer).AppendEntires(ctx, req.(*AppendEntiresReq))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _NodeService_LeaveCluster_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(LeaveClusterReq)
+func _NodeService_RequestVote_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(RequestVoteReq)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(NodeServiceServer).LeaveCluster(ctx, in)
+		return srv.(NodeServiceServer).RequestVote(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/proto.NodeService/LeaveCluster",
+		FullMethod: "/proto.NodeService/RequestVote",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(NodeServiceServer).LeaveCluster(ctx, req.(*LeaveClusterReq))
+		return srv.(NodeServiceServer).RequestVote(ctx, req.(*RequestVoteReq))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -128,12 +128,12 @@ var NodeService_ServiceDesc = grpc.ServiceDesc{
 	HandlerType: (*NodeServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
-			MethodName: "HeartBeat",
-			Handler:    _NodeService_HeartBeat_Handler,
+			MethodName: "AppendEntires",
+			Handler:    _NodeService_AppendEntires_Handler,
 		},
 		{
-			MethodName: "LeaveCluster",
-			Handler:    _NodeService_LeaveCluster_Handler,
+			MethodName: "RequestVote",
+			Handler:    _NodeService_RequestVote_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
