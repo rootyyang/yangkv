@@ -27,7 +27,7 @@ func TestRaftLogBasicFunction(t *testing.T) {
 			t.Fatalf("lc.back()=any, any, %v, want any, any, true", isNull)
 		}
 		for i := 1; i < int(len); i++ {
-			_, err := rl.append(&TestCommand{fmt.Sprintf("%d", i)}, uint64(i))
+			_, _, _, err := rl.append(&TestCommand{fmt.Sprintf("%d", i)}, uint64(i))
 			if err != nil {
 				t.Fatalf("lc.insert(TestCommand(%v)) = %v , want nil", i, err)
 			}
@@ -36,7 +36,7 @@ func TestRaftLogBasicFunction(t *testing.T) {
 				t.Fatalf("lc.back()=%v, %v, %v, want %v, %v, true", lastIndex, lastTerm, isNull, i, i)
 			}
 		}
-		_, err := rl.append(&TestCommand{fmt.Sprintf("%d", len)}, uint64(len))
+		_, _, _, err := rl.append(&TestCommand{fmt.Sprintf("%d", len)}, uint64(len))
 		if err == nil {
 			t.Fatalf("lc.insert(TestCommand(%v)) = nil , want not nil", len)
 		}

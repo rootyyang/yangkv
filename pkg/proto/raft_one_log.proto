@@ -1,0 +1,9 @@
+syntax = "proto3";
+package proto;
+
+option go_package="pkg/proto;proto";
+
+message  RaftOneLog {
+    uint64 term = 1;
+    string serialized_command=2;
+}

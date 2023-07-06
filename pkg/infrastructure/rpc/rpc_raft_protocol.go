@@ -8,6 +8,7 @@ type AppendEntiresReq struct {
 	PrevLogIndex uint64
 	PrevLogTerm  uint64
 	Entries      []string
+	LeaderCommit uint64
 }
 
 type AppendEntiresResp struct {

@@ -49,7 +49,7 @@ func GetLog() (LogInterface, error) {
 }
 
 //方便使用，不足od是否SetUseLog的判断
-func GetLogInstance() LogInterface {
+func Instance() LogInterface {
 	return globalLog.global
 }
 

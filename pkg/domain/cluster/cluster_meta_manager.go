@@ -31,12 +31,12 @@ type clusterMetaManagerImp struct {
 func (cmm *clusterMetaManagerImp) Start(pClusterName string, pDiscoveryList []string, plocalNodeTransport string) error {
 	localNodeAddr, err := system.GetLocalAddr()
 	if err != nil {
-		log.GetLogInstance().Errorf("system.GetLocalAddr() error %s", err.Error())
+		log.Instance().Errorf("system.GetLocalAddr() error %s", err.Error())
 		return err
 	}
 	masterIp, masterPort, err := net.SplitHostPort(pDiscoveryList[0])
 	if err != nil {
-		log.GetLogInstance().Errorf("net.SplitHostPort(%v) error %s", pDiscoveryList[0], err.Error())
+		log.Instance().Errorf("net.SplitHostPort(%v) error %s", pDiscoveryList[0], err.Error())
 		return err
 	}
 	localNodeId := base64.StdEncoding.EncodeToString([]byte(localNodeAddr + ":" + plocalNodeTransport))

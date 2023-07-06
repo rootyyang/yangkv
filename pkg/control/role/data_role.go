@@ -29,13 +29,13 @@ func (dr *DataRoleImp) Start(pClusterName string, pDiscoveryList []string, ploca
 	gRequestHandle.Start()
 	rpcServer, err := rpc.GetRPCServer()
 	if err != nil {
-		log.GetLogInstance().Errorf("rpc.GetRPCServer() Error %v", err)
+		log.Instance().Errorf("rpc.GetRPCServer() Error %v", err)
 		fmt.Printf("rpc.GetRPCServer() Error %v", err)
 		return err
 	}
 	err = rpcServer.Start(plocalNodeTransport, gRequestHandle)
 	if err != nil {
-		log.GetLogInstance().Errorf("rpcServer.Start() Error %v", err)
+		log.Instance().Errorf("rpcServer.Start() Error %v", err)
 		return err
 	}
 	clusterMetaManager := cluster.GetClusterMetaManager()
