@@ -232,17 +232,21 @@ func (rn *raft) Stop() {
 	}
 }
 
-/*超时和失败重试，应该在状态机中进行
+/*
+服务启动以后，先探测nextIndex避免
+超时和失败重试，应该在状态机中进行
+
 这里数据同步的几种方式，主要注意乱序和丢失的问题，并且在节点返回失败之后，要移动nextIndex
 解决方案(当前选择方案三):
 一.每个节点由单个协程同步数据，为了解决QPS问题，一次同步，应该是包含多条日志
 问题1: 延时，用户的延时可能是两轮同步的网络延时，即一个新的请求到了，需要等待上一轮的同步结束
-优点2: 实现简单
-二.每个请求，由一个协程同步一次数据，并且负责之后的重试，
+优点1: 实现简单
+二.每个请求，由一个协程同步一次数据，并且负责之后的重试，(该方案不靠谱)
 问题1: 遇到返回false应该如何处理？
 问题2: 如果单个节点失败，会导致协程数不断累计
-三.每个请求，由一个协程同步一次数据，每个节点由一个协程负责重试
+三.每个请求，由一个协程同步一次数据，失败后，由单个协程负责重试(该方案，正常情况下延时最低)
 问题1: 协程应该如何负责重试？ 收到一次失败通知，批量重试一次
+问题2: 重试策略？
 */
 func (rn *raft) ApplyMsg(ctx context.Context, pCommand Command) error {
 	rn.stateMutex.RLock()
@@ -256,11 +260,26 @@ func (rn *raft) ApplyMsg(ctx context.Context, pCommand Command) error {
 	if err != nil {
 		return err
 	}
-	//开始同步数据，follower接收到数据，如果遇到乱序问题，则接收方等待至超时，如果有失败，触发重新同步
-	return rn.trySyncMsgAndHandleResult(tmpCurrentTerm, msgIndex, []string{pCommand.ToString()}, prevIndex, prevTerm)
+	//等待ctx超时
+	syncResultChannel := make(chan bool)
+	//同步数据
+	rn.trySyncMsgAndHandleResult(tmpCurrentTerm, msgIndex, []string{pCommand.ToString()}, prevIndex, prevTerm)
+	select {
+	case <-ctx.Done():
+		return fmt.Errorf("timeout Error")
+	case success := <-syncResultChannel:
+		if success {
+			return nil
+		} else {
+			return fmt.Errorf("sync follower error")
+		}
+	}
 }
 
-func (rn *raft) trySyncMsgAndHandleResult(pCurrentTerm uint64, pCurrentIndex uint64, pSerialCommand []string, pPrevIndex uint64, pPrevTerm uint64) error {
+//同步有两种方式
+//定义一些全局变量，每个协程都尝试抢锁，然后做状态更新
+//通过channel，交给一个统一的协程进行处理
+func (rn *raft) trySyncMsgAndHandleResult(pSuccessResult chan<- bool, pCurrentTerm uint64, pCurrentIndex uint64, pSerialCommand []string, pPrevIndex uint64, pPrevTerm uint64) error {
 	type appendEntriesRespWrapper struct {
 		key  int
 		resp *rpc.AppendEntiresResp
@@ -271,8 +290,10 @@ func (rn *raft) trySyncMsgAndHandleResult(pCurrentTerm uint64, pCurrentIndex uin
 		tmpValue := value
 		ctx, _ := context.WithTimeout(context.Background(), 100*time.Millisecond)
 		resp, err := tmpValue.GetRPC().AppendEntires(ctx, &rpc.AppendEntiresReq{LeaderTerm: pCurrentTerm, LeaderId: rn.localNodeMeta.NodeId, PrevLogIndex: pPrevIndex, PrevLogTerm: pPrevTerm})
+		//每个都要做的，在自己线程中做
 		if err != nil {
 			AppendRespChannel <- appendEntriesRespWrapper{tmpKey, nil}
+
 		} else {
 			AppendRespChannel <- appendEntriesRespWrapper{tmpKey, resp}
 		}
@@ -318,6 +339,7 @@ func (rn *raft) trySyncMsgAndHandleResult(pCurrentTerm uint64, pCurrentIndex uin
 	if len(successKeys)+1 >= int(rn.clusterMajority) {
 		return rn.logs.commit(pCurrentIndex)
 	}
+	//触发重试
 	return fmt.Errorf("Not Sync Majority")
 }
 
